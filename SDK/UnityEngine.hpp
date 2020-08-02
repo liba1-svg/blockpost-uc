@@ -11,14 +11,26 @@ namespace UnityEngine {
 		float r, g, b, a;
 	};
 
-	struct RaycastHit {
-		Vector3 Point;
-		Vector3 Normal;
+	class RaycastHit {
+	public:
+		Vector3 Point, Normal;
 		std::uint32_t FaceID;
 		float Distance;
 		Vector2 UV;
 		std::int32_t Collider;
 	};
+
+	/*class Matrix4x4 {
+	public:
+		float m00, m10, m20, m30;
+		float m01, m11, m21, m31;
+		float m02, m12, m22, m32;
+		float m03, m13, m23, m33;
+	};*/
+
+	template<typename T> inline T CALL_UNITY_METHOD(std::string method_name) {
+		return reinterpret_cast<T>(reinterpret_cast<LPVOID(CDECL*)(const char*)>(GetProcAddress(static_cast<HMODULE>(GameAssembly), "il2cpp_resolve_icall"))(method_name.c_str()));
+	}
 
 	class Controll {
 	public:
@@ -69,21 +81,21 @@ namespace UnityEngine {
 	class Input {
 	public:
 		static bool GetKey(Enums::KeyCode key) {
-			return Memory::FUNCTION_CAST<bool, Enums::KeyCode>(Offsets::Methods::Input::GetKey, key);
+			return Memory::FUNCTION_CAST<bool, Enums::KeyCode>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Input::GetKey), key);
 		}
 	};
 
 	class Object {
 	public:
 		static std::add_pointer_t<SystemString> GetName(std::add_pointer_t<Object> instance) {
-			return Memory::FUNCTION_CAST<std::add_pointer_t<SystemString>, std::add_pointer_t<Object>>(Offsets::Methods::Object::GetName, instance);
+			return Memory::FUNCTION_CAST<std::add_pointer_t<SystemString>, std::add_pointer_t<Object>>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Object::GetName), instance);
 		}
 	};
 
 	class Texture {
 	public:
-		static std::add_pointer_t<Texture> GenerateTexture(Color color, SystemString* name) {
-			return Memory::FUNCTION_CAST<std::add_pointer_t<Texture>, Color, SystemString*>(Offsets::Methods::Texture::GenerateTexture, color, name);
+		static std::add_pointer_t<Texture> GenerateTexture(Color color, std::add_pointer_t<SystemString> name) {
+			return Memory::FUNCTION_CAST<std::add_pointer_t<Texture>, Color, std::add_pointer_t<SystemString>>(Offsets::Methods::Texture::GenerateTexture, color, name);
 		}
 
 		static void SetPixel(std::add_pointer_t<Texture> instance, std::int32_t x, std::int32_t y, Color color) {
@@ -98,37 +110,37 @@ namespace UnityEngine {
 	class Screen {
 	public:
 		static Resolution GetResolution() {
-			return { Memory::FUNCTION_CAST<std::int32_t>(Offsets::Methods::Screen::GetWidth),
-				Memory::FUNCTION_CAST<std::int32_t>(Offsets::Methods::Screen::GetHeight) };
+			return { Memory::FUNCTION_CAST<std::int32_t>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Screen::GetWidth)),
+				Memory::FUNCTION_CAST<std::int32_t>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Screen::GetHeight)) };
 		}
 	};
 
 	class Camera {
 	public:
-		static Vector3 WorldToScreen(std::add_pointer_t<Camera> instance, Vector3 position) {
-			return Memory::FUNCTION_CAST<Vector3, std::add_pointer_t<Camera>, Vector3>(Offsets::Methods::Camera::WorldToScreen, instance, position);
+		static void WorldToScreen(std::add_pointer_t<Camera> instance, std::add_pointer_t<Vector3> position, std::int32_t MonoOrStereoscopicEye, std::add_pointer_t<Vector3> result) {
+			return Memory::FUNCTION_CAST<void, std::add_pointer_t<Camera>, std::add_pointer_t<Vector3>, std::int32_t, std::add_pointer_t<Vector3>>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Camera::WorldToScreen), instance, position, MonoOrStereoscopicEye, result);
 		}
 
 		static float FieldOfView(std::add_pointer_t<Camera> instance) {
-			return Memory::FUNCTION_CAST<float, std::add_pointer_t<Camera>>(Offsets::Methods::Camera::FieldOfView, instance);
+			return Memory::FUNCTION_CAST<float, std::add_pointer_t<Camera>>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Camera::FieldOfView), instance);
 		}
 
 		static void SetFieldOfView(std::add_pointer_t<Camera> instance, float value) {
-			return Memory::FUNCTION_CAST<void, std::add_pointer_t<Camera>, float>(Offsets::Methods::Camera::SetFieldOfView, instance, value);
+			return Memory::FUNCTION_CAST<void, std::add_pointer_t<Camera>, float>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Camera::SetFieldOfView), instance, value);
 		}
 	};
 
 	class Physics {
 	public:
-		static bool Linecast(Vector3 start, Vector3 end, std::add_lvalue_reference_t<RaycastHit> hit_info) {
-			return Memory::FUNCTION_CAST<bool, Vector3, Vector3, std::add_lvalue_reference_t<RaycastHit>>(Offsets::Methods::Physics::Linecast, start, end, hit_info);
+		static bool Linecast(Vector3 start, Vector3 end, std::add_pointer_t<RaycastHit> hit_info) {
+			return Memory::FUNCTION_CAST<bool, Vector3, Vector3, std::add_pointer_t<RaycastHit>>(Offsets::Methods::Physics::Linecast, start, end, hit_info);
 		}
 	};
 
 	class Transform {
 	public:
-		static Vector3 GetPosition(std::add_pointer_t<Transform> instance) {
-			return Memory::FUNCTION_CAST<Vector3, std::add_pointer_t<Transform>>(Offsets::Methods::Transform::GetPosition, instance);
+		static void GetPosition(std::add_pointer_t<Transform> instance, std::add_pointer_t<Vector3> result) {
+			return Memory::FUNCTION_CAST<void, std::add_pointer_t<Transform>, std::add_pointer_t<Vector3>>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Transform::GetPosition), instance, result);
 		}
 
 		static Vector3 GetRight(std::add_pointer_t<Transform> instance) {
@@ -143,15 +155,15 @@ namespace UnityEngine {
 			return Memory::FUNCTION_CAST<Vector3, std::add_pointer_t<Transform>>(Offsets::Methods::Transform::GetForward, instance);
 		}
 
-		static Vector3 GetLocalScale(std::add_pointer_t<Transform> instance) {
-			return Memory::FUNCTION_CAST<Vector3, std::add_pointer_t<Transform>>(Offsets::Methods::Transform::GetLocalScale, instance);
+		static void GetLocalScale(std::add_pointer_t<Transform> instance, std::add_pointer_t<Vector3> result) {
+			return Memory::FUNCTION_CAST<void, std::add_pointer_t<Transform>, std::add_pointer_t<Vector3>>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::Transform::GetLocalScale), instance, result);
 		}
 	};
 
 	class GameObject {
 	public:
 		static std::add_pointer_t<Transform> GetTransform(std::add_pointer_t<GameObject> instance) {
-			return Memory::FUNCTION_CAST<std::add_pointer_t<Transform>, std::add_pointer_t<GameObject>>(Offsets::Methods::GameObject::GetTransform, instance);
+			return Memory::FUNCTION_CAST<std::add_pointer_t<Transform>, std::add_pointer_t<GameObject>>(CALL_UNITY_METHOD<std::uintptr_t>(Offsets::Methods::GameObject::GetTransform), instance);
 		}
 	};
 }

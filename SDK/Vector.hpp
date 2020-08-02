@@ -9,6 +9,7 @@ public:
 		return this->x || this->y || this->z;
 	}
 
+
 	Vector3& operator+=(const Vector3& v)
 	{
 		this->x += v.x;
@@ -35,6 +36,16 @@ public:
 	Vector3 operator*(float mul) const
 	{
 		return Vector3{ this->x * mul, this->y * mul, this->z * mul };
+	}
+
+	Vector3 operator/(float div) const
+	{
+		return Vector3{ this->x / div, this->y / div, this->z / div };
+	}
+
+	float Dot(const Vector3& v) const
+	{
+		return this->x * v.x + this->y * v.y + this->z * v.z;
 	}
 
 	float x, y, z;

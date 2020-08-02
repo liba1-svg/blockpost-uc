@@ -20,7 +20,8 @@ public:
 		{
 			if (!GameManager->TeamCheck(Player) || Player->idx == GameControll->local_player->idx || Player->health <= 10) continue;
 
-			Vector3 OriginW2S = UnityEngine::Camera::WorldToScreen(GameControll->camera, Player->current_pos);
+			Vector3 OriginW2S = { 0.f, 0.f, 0.f };
+			UnityEngine::Camera::WorldToScreen(GameControll->camera, &Player->current_pos, 2, &OriginW2S);
 			if (OriginW2S.z < 1.f) continue;
 
 			Vector3 Origin, OriginTextPosition;
@@ -40,7 +41,10 @@ public:
 			std::vector<Vector3> EdgesOfBone = GameManager->EdgesOfAnObject(GameObject);
 			if (EdgesOfBone.empty()) continue;
 
-			bool LineOfSight = GameManager->MultipleLineOfSight(EdgesOfBone, UnityEngine::Transform::GetPosition(GameControll->transform_cam));
+			Vector3 CameraPosition = { 0.f, 0.f, 0.f };
+			UnityEngine::Transform::GetPosition(GameControll->transform_cam, &CameraPosition);
+
+			bool LineOfSight = GameManager->MultipleLineOfSight(EdgesOfBone, CameraPosition);
 
 			if (Config::ESP::Visible && !LineOfSight) continue;
 
@@ -54,7 +58,8 @@ public:
 			GameManager->ChangeTextureColor(ESP::BoxTexture, ESP::BoxColor);
 
 			if (Config::ESP::Box) {
-				Vector3 BoxOriginW2S = UnityEngine::Camera::WorldToScreen(GameControll->camera, Origin);
+				Vector3 BoxOriginW2S = { 0.f, 0.f, 0.f };
+				UnityEngine::Camera::WorldToScreen(GameControll->camera, &Origin, 2, &BoxOriginW2S);
 				if (BoxOriginW2S.z < 1.f) continue;
 
 				float CalculateBox = abs(BoxOriginW2S.y - OriginW2S.y) * 4.f, CalculateBoxWidth = CalculateBox * 0.60f;
@@ -66,7 +71,8 @@ public:
 			}
 
 			if (Config::ESP::Name) {
-				Vector3 TextOriginW2S = UnityEngine::Camera::WorldToScreen(GameControll->camera, OriginTextPosition);
+				Vector3 TextOriginW2S = { 0.f, 0.f, 0.f };
+				UnityEngine::Camera::WorldToScreen(GameControll->camera, &OriginTextPosition, 2, &TextOriginW2S);
 				TextOriginW2S.y = Resolution.height - TextOriginW2S.y;
 
 				UnityEngine::GUIM::DrawTextColor(UnityEngine::Rect{

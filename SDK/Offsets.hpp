@@ -23,11 +23,11 @@ namespace Offsets {
 		}
 
 		namespace Input {
-			inline std::uintptr_t GetKey = Memory::MAKE_RVA(0x34B960);
+			inline std::string GetKey = "UnityEngine.Input::GetKeyInt(UnityEngine.KeyCode)";
 		}
 
 		namespace Object {
-			inline std::uintptr_t GetName = Memory::MAKE_RVA(0x3D3450);
+			inline std::string GetName = "UnityEngine.Object::GetName(UnityEngine.Object)";
 		}
 
 		namespace Texture {
@@ -37,14 +37,15 @@ namespace Offsets {
 		}
 
 		namespace Screen {
-			inline std::uintptr_t GetWidth = Memory::MAKE_RVA(0x3DEF80);
-			inline std::uintptr_t GetHeight = Memory::MAKE_RVA(0x3DEF00);
+			inline std::string GetWidth = "UnityEngine.Screen::get_width()";
+			inline std::string GetHeight = "UnityEngine.Screen::get_height()";
 		}
 
 		namespace Camera {
-			inline std::uintptr_t WorldToScreen = Memory::MAKE_RVA(0x343640);
-			inline std::uintptr_t FieldOfView = Memory::MAKE_RVA(0x343BB0);
-			inline std::uintptr_t SetFieldOfView = Memory::MAKE_RVA(0x344350);
+			inline std::string WorldToScreen = "UnityEngine.Camera::WorldToScreenPoint_Injected(UnityEngine.Vector3&,UnityEngine.Camera/MonoOrStereoscopicEye,UnityEngine.Vector3&)";
+			inline std::string FieldOfView = "UnityEngine.Camera::get_fieldOfView()";
+			inline std::string SetFieldOfView = "UnityEngine.Camera::set_fieldOfView(System.Single)";
+			inline std::string ProjectionMatrix = "UnityEngine.Camera::get_projectionMatrix_Injected(UnityEngine.Matrix4x4&)";
 		}
 
 		namespace Physics {
@@ -52,15 +53,16 @@ namespace Offsets {
 		}
 
 		namespace Transform {
-			inline std::uintptr_t GetPosition = Memory::MAKE_RVA(0x59AFB0);
+			inline std::string GetPosition = "UnityEngine.Transform::get_position_Injected(UnityEngine.Vector3&)";
+			inline std::string GetLocalScale = "UnityEngine.Transform::get_localScale_Injected(UnityEngine.Vector3&)";
+
 			inline std::uintptr_t GetRight = Memory::MAKE_RVA(0x59B020);
 			inline std::uintptr_t GetUp = Memory::MAKE_RVA(0x59B220);
 			inline std::uintptr_t GetForward = Memory::MAKE_RVA(0x59A9C0);
-			inline std::uintptr_t GetLocalScale = Memory::MAKE_RVA(0x59AD60);
 		}
 
 		namespace GameObject {
-			inline std::uintptr_t GetTransform = Memory::MAKE_RVA(0x348F20);
+			inline std::string GetTransform = "UnityEngine.GameObject::get_transform()";
 		}
 	}
 

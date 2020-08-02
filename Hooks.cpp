@@ -10,7 +10,7 @@ LRESULT Hooks::WndProc(const HWND Window, UINT MSG_TYPE, WPARAM WPARAM, LPARAM L
 	return CallWindowProc(Hooks::WND_PROC, Window, MSG_TYPE, WPARAM, LPARAM);
 }
 
-HRESULT WINAPI Hooks::HookPresent(IDXGISwapChain* SwapChain, UINT SyncInterval, UINT Flags)
+HRESULT WINAPI Hooks::HookPresent(std::add_pointer_t<IDXGISwapChain> SwapChain, UINT SyncInterval, UINT Flags)
 {
 	if (!Hooks::DX11Device || !Hooks::DX11DeviceContext)
 	{
@@ -43,8 +43,10 @@ HRESULT WINAPI Hooks::HookPresent(IDXGISwapChain* SwapChain, UINT SyncInterval, 
 
 	Menu::Render();
 
+	UnityEngine::Color CircleColor = Aimbot::Target ? UnityEngine::Color{ 0.f, 255.f, 0.f, 255.f } : UnityEngine::Color{ 255.f, 0.f, 0.f, 255.f };
+
 	if (Config::Aimbot::DrawFov && UnityEngine::Client::IsConnected())
-		Draw::Circle(Vector2{ ScreenResolution.width / 2.f, ScreenResolution.height / 2.f }, Config::Aimbot::Fov, UnityEngine::Color{ 255.f, 255.f, 255.f, 255.f }, 180);
+		Draw::Circle(Vector2{ ScreenResolution.width / 2.f, ScreenResolution.height / 2.f }, Config::Aimbot::Fov, CircleColor, 180);
 
 	Hooks::DX11DeviceContext->OMSetRenderTargets(1, &Hooks::DX11RenderTargetView, nullptr);
 	ImGui::EndFrame();
@@ -55,7 +57,7 @@ HRESULT WINAPI Hooks::HookPresent(IDXGISwapChain* SwapChain, UINT SyncInterval, 
 	return Hooks::Original_D3D11Present(SwapChain, SyncInterval, Flags);
 }
 
-HRESULT WINAPI Hooks::HookResizeBuffers(IDXGISwapChain* SwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
+HRESULT WINAPI Hooks::HookResizeBuffers(std::add_pointer_t<IDXGISwapChain> SwapChain, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
 {
 	Memory::SAFE_RELEASE(Hooks::DX11RenderTargetView);
 
@@ -108,12 +110,12 @@ DWORD WINAPI Hooks::HookDirectX11()
 	if (FAILED(DeviceAndSwapChain))
 		Utils::EXIT_FAILURE_WITH_MSG("Failed to create device and swapchain");
 
-	std::uintptr_t* SwapChainVTable = reinterpret_cast<std::uintptr_t*>(reinterpret_cast<std::uintptr_t*>(Hooks::SwapChain)[0]);
+	std::add_pointer_t<std::uintptr_t> SwapChainVTable = reinterpret_cast<std::add_pointer_t<std::uintptr_t>>(reinterpret_cast<std::add_pointer_t<std::uintptr_t>>(Hooks::SwapChain)[0]);
 
-	if (MH_CreateHook(reinterpret_cast<LPVOID>(SwapChainVTable[8]), &Hooks::HookPresent, reinterpret_cast<LPVOID*>(&Hooks::Original_D3D11Present)) != MH_OK)
+	if (MH_CreateHook(reinterpret_cast<LPVOID>(SwapChainVTable[8]), &Hooks::HookPresent, reinterpret_cast<std::add_pointer_t<LPVOID>>(&Hooks::Original_D3D11Present)) != MH_OK)
 		Utils::EXIT_FAILURE_WITH_MSG("DX11 Present Hook Error");
 
-	if (MH_CreateHook(reinterpret_cast<LPVOID>(SwapChainVTable[13]), &Hooks::HookResizeBuffers, reinterpret_cast<LPVOID*>(&Hooks::Original_D3D11ResizeBuffers)) != MH_OK)
+	if (MH_CreateHook(reinterpret_cast<LPVOID>(SwapChainVTable[13]), &Hooks::HookResizeBuffers, reinterpret_cast<std::add_pointer_t<LPVOID>>(&Hooks::Original_D3D11ResizeBuffers)) != MH_OK)
 		Utils::EXIT_FAILURE_WITH_MSG("DX11 ResizeBuffers Hook Error");
 
 	return S_OK;
@@ -137,14 +139,16 @@ BOOL Hooks::GetKeyUp(std::int32_t key) {
 	return key == Enums::KeyCode::Insert ? false : Hooks::Original_GetKeyUp(key); // The best anti-cheat in the world
 }
 
-BOOL Hooks::Raycast(Vector3 pos, Vector3 dir, UnityEngine::RaycastHit& hit, float dist) {
+BOOL Hooks::Raycast(Vector3 pos, Vector3 dir, std::add_pointer_t<UnityEngine::RaycastHit> hit, float dist) {
 	if (!Aimbot::Target && Config::Misc::HitDistanceLimit)
 		dist = INFINITY;
 
 	if (Config::Aimbot::Silent && Aimbot::Target)
 		pos = Aimbot::Target;
 
-	return Hooks::Original_Raycast(pos, dir, hit, dist);
+	Hooks::Original_Raycast(pos, dir, hit, dist);
+
+	return true;
 }
 
 VOID Hooks::Initialize() const
@@ -152,16 +156,16 @@ VOID Hooks::Initialize() const
 	if (MH_Initialize() != MH_OK)
 		Utils::EXIT_FAILURE_WITH_MSG("MH Initialize Error");
 
-	if (MH_CreateHook(Offsets::Hooks::Update, &Hooks::Update, reinterpret_cast<LPVOID*>(&Hooks::Original_Update)) != MH_OK)
+	if (MH_CreateHook(Offsets::Hooks::Update, &Hooks::Update, reinterpret_cast<std::add_pointer_t<LPVOID>>(&Hooks::Original_Update)) != MH_OK)
 		Utils::EXIT_FAILURE_WITH_MSG("Hooks::Update Error");
 
-	if (MH_CreateHook(Offsets::Hooks::GUI, &Hooks::OnGUI, reinterpret_cast<LPVOID*>(&Hooks::Original_OnGUI)) != MH_OK)
+	if (MH_CreateHook(Offsets::Hooks::GUI, &Hooks::OnGUI, reinterpret_cast<std::add_pointer_t<LPVOID>>(&Hooks::Original_OnGUI)) != MH_OK)
 		Utils::EXIT_FAILURE_WITH_MSG("Hooks::OnGUI Error");
 
-	if (MH_CreateHook(Offsets::Hooks::GetKeyUp, &Hooks::GetKeyUp, reinterpret_cast<LPVOID*>(&Hooks::Original_GetKeyUp)) != MH_OK)
+	if (MH_CreateHook(Offsets::Hooks::GetKeyUp, &Hooks::GetKeyUp, reinterpret_cast<std::add_pointer_t<LPVOID>>(&Hooks::Original_GetKeyUp)) != MH_OK)
 		Utils::EXIT_FAILURE_WITH_MSG("Hooks::GetKeyUp Error");
 
-	if (MH_CreateHook(Offsets::Hooks::Raycast, &Hooks::Raycast, reinterpret_cast<LPVOID*>(&Hooks::Original_Raycast)) != MH_OK)
+	if (MH_CreateHook(Offsets::Hooks::Raycast, &Hooks::Raycast, reinterpret_cast<std::add_pointer_t<LPVOID>>(&Hooks::Original_Raycast)) != MH_OK)
 		Utils::EXIT_FAILURE_WITH_MSG("Hooks::Raycast Error");
 
 	Hooks::HookDirectX11();

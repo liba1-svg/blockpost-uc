@@ -34,19 +34,22 @@ public:
 
 			Vector3 BonePosition = EdgesOfBone[0];
 
-			Vector3 CameraPosition = UnityEngine::Transform::GetPosition(GameControll->transform_cam);
+			Vector3 CameraPosition = { 0.f, 0.f, 0.f };
+			UnityEngine::Transform::GetPosition(GameControll->transform_cam, &CameraPosition);
 			Vector3 CameraForward = UnityEngine::Transform::GetForward(GameControll->transform_cam);
 
 			if (Config::Aimbot::Visible && !GameManager->MultipleLineOfSight(EdgesOfBone, CameraPosition)) continue;
 
 			CameraPosition += CameraForward;
 
-			Vector3 BoneW2S = UnityEngine::Camera::WorldToScreen(GameControll->camera, BonePosition);
+			Vector3 BoneW2S = { 0.f, 0.f, 0.f };
+			UnityEngine::Camera::WorldToScreen(GameControll->camera, &BonePosition, 2, &BoneW2S);
 			if (BoneW2S.z < 1.f) continue;
 
-			Vector3 CameraW2S = UnityEngine::Camera::WorldToScreen(GameControll->camera, CameraPosition);
+			Vector3 CameraW2S = { 0.f, 0.f, 0.f };
+			UnityEngine::Camera::WorldToScreen(GameControll->camera, &CameraPosition, 2, &CameraW2S);
 			CameraW2S.y = UnityEngine::Screen::GetResolution().height - CameraW2S.y;
-
+			
 			Vector2 Camera2D{ CameraW2S.x - BoneW2S.x, CameraW2S.y - BoneW2S.y };
 
 			if (Camera2D.length() < Aimbot::BestFov) {
@@ -56,7 +59,9 @@ public:
 		}
 
 		if (Aimbot::Target && !Config::Aimbot::Silent) {
-			Vector2 CalculateAngle = Aimbot::CalculateAngle(UnityEngine::Transform::GetPosition(GameControll->transform_cam), Aimbot::Target);
+			Vector3 CameraPosition = { 0.f, 0.f, 0.f };
+			UnityEngine::Transform::GetPosition(GameControll->transform_cam, &CameraPosition);
+			Vector2 CalculateAngle = Aimbot::CalculateAngle(CameraPosition, Aimbot::Target);
 			if (!CalculateAngle) return;
 
 			GameControll->view_angle = CalculateAngle;

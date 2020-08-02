@@ -39,8 +39,8 @@ public:
 	}
 
 	inline void ChangeTextureColor(UnityEngine::Texture* texture, UnityEngine::Color color) {
-		for (int i = 0; i < 8; i++)
-			for (int j = 0; j < 8; j++)
+		for (size_t i = 0; i < 8; i++)
+			for (size_t j = 0; j < 8; j++)
 				UnityEngine::Texture::SetPixel(texture, i, j, color);
 
 		UnityEngine::Texture::Apply(texture, true);
@@ -52,8 +52,11 @@ public:
 		UnityEngine::Transform* Transform = UnityEngine::GameObject::GetTransform(Object);
 		if (!Transform) return std::vector<Vector3>();
 
-		Vector3 ObjectPosition = UnityEngine::Transform::GetPosition(Transform);
-		Vector3 ObjectLocalScale = UnityEngine::Transform::GetLocalScale(Transform);
+		Vector3 ObjectPosition = { 0.f, 0.f, 0.f };
+		Vector3 ObjectLocalScale = { 0.f, 0.f, 0.f };
+
+		UnityEngine::Transform::GetPosition(Transform, &ObjectPosition);
+		UnityEngine::Transform::GetLocalScale(Transform, &ObjectLocalScale);
 
 		Vector3 ObjectLeft = ObjectPosition + UnityEngine::Transform::GetRight(Transform) * (ObjectLocalScale / 2.f);
 		Vector3 ObjectRight = ObjectPosition - UnityEngine::Transform::GetRight(Transform) * (ObjectLocalScale / 2.f);
@@ -70,7 +73,7 @@ public:
 		static UnityEngine::RaycastHit RaycastHit;
 
 		for (Vector3 position : positions)
-			if (!UnityEngine::Physics::Linecast(position, src, RaycastHit))
+			if (!UnityEngine::Physics::Linecast(position, src, &RaycastHit))
 				return true;
 
 		return false;
@@ -78,7 +81,7 @@ public:
 
 	inline bool LineOfSight(Vector3 position, Vector3 src) {
 		static UnityEngine::RaycastHit RaycastHit;
-		return !UnityEngine::Physics::Linecast(position, src, RaycastHit);
+		return !UnityEngine::Physics::Linecast(position, src, &RaycastHit);
 	}
 
 	inline void DisableInput(bool value) {

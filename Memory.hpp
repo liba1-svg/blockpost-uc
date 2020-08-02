@@ -15,8 +15,8 @@ class PLHKlass;
 class Memory {
 public:
 	Memory() {
-		this->Controll	= Memory::FindKlass<ControllKlass>("Controll");
-		this->PLH		= Memory::FindKlass<PLHKlass>("PLH");
+		this->Controll = Memory::FindKlass<ControllKlass>(std::string{ "Controll" });
+		this->PLH = Memory::FindKlass<PLHKlass>(std::string{ "PLH" });
 	};
 
 	static constexpr auto MAKE_RVA = [](std::uintptr_t address) -> std::uintptr_t
@@ -75,10 +75,8 @@ public:
 			if (!KlassNamePtr) continue;
 			if (!IsValidPage(KlassNamePtr)) continue;
 
-			if (!std::strcmp(reinterpret_cast<const char*>(KlassNamePtr), KlassName.c_str())) {
-				std::printf("%s: %p\n", KlassName.c_str(), reinterpret_cast<T*>(Klass));
+			if (!std::strcmp(reinterpret_cast<const char*>(KlassNamePtr), KlassName.c_str()))
 				return reinterpret_cast<T*>(Klass);
-			}
 		}
 
 		Utils::EXIT_FAILURE_WITH_MSG(std::string{ KlassName + " not found" });
@@ -99,8 +97,8 @@ public:
 		}
 	}
 
-	ControllKlass* Controll;
-	PLHKlass* PLH;
+	std::add_pointer_t<ControllKlass> Controll;
+	std::add_pointer_t<PLHKlass> PLH;
 };
 
 inline std::unique_ptr<const Memory> GameMemory;
